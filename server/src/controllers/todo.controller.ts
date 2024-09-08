@@ -3,18 +3,24 @@ import { Request, Response } from 'express';
 import { prisma } from '../utils/db';
 
 const createTodo = async (req: Request, res: Response) => {
-    const {description, status}:{description: string, status?: Status} = req.body;
-
+    const { description, status }: { description: string; status?: Status } = req.body;
+  
+    if (!description) {
+      return res.status(400).json({ error: "Description is required" });
+    }
+  
     try {
-        const newTodo: Todo = await prisma.todo.create({
-            data: {
-                description,
-                status: status || 'pending'
-            }
-        })
-        res.status(201).json({
-            message: "todo created successfully"
-        })
+      const newTodo: Todo = await prisma.todo.create({
+        data: {
+          description,
+          status: status || 'pending',
+        },
+      });
+  
+      return res.status(201).json({
+        message: "Todo created successfully",
+        todo: newTodo, // Send back created todo
+      });
     } catch (error) {
         console.log(error)
         res.status(500).json({
